@@ -1,50 +1,54 @@
-# 📡 NewsRadar
+# NewsRadar
 
-> An AI-powered news monitoring platform that automatically collects, enriches, and aggregates news from multiple sources into a single unified dashboard.
+**A self-hosted news radar that collects articles from your own sources and has a local model summarise and classify them.** NewsRadar pulls news from RSS/Atom feeds, NewsAPI, GNews and custom browser scrapers on a schedule, then runs each article through a local Ollama model for a short summary, theme tags, a sentiment score and a country relevance score.
 
-![Status](https://img.shields.io/badge/status-active-brightgreen)
+When two sources report the same story, the articles are grouped together, so one story shows up once with every source that covered it.
 
-## Overview
+<!-- screenshots -->
 
-NewsRadar is a complete news intelligence tool built for organisations that need to track coverage across countries, topics, and publishers — without relying on a third-party service. It runs on your own infrastructure, connects to any news source (RSS feeds, API-based news services, or direct website scraping), and uses a local AI model to summarise every article, classify its themes, score its sentiment, and assess its relevance to your target regions.
+## Features
 
-It is designed and developed by **Munda Plus d.o.o.**, a Slovenian one-person software company.
+- **Four kinds of source.** RSS/Atom feeds, NewsAPI and GNews queries, and Playwright scrapers for sites that are rendered in JavaScript or have no feed.
+- **Local AI enrichment.** One structured prompt per article to Ollama returns a 2–3 sentence English summary, themes from your own list, sentiment from -1 to +1 and relevance to the tracked country.
+- **Story grouping.** After enrichment, each article is compared with recent ones from the same country; similar articles are merged into a group with a combined theme set, average sentiment and a source switcher.
+- **Deduplication.** Exact URL matches and near-identical titles are dropped before anything is saved.
+- **Views by country and theme.** Pages for a country, for a theme across all countries, and for the intersection of both.
+- **Dashboard.** Recent articles, theme and sentiment breakdowns, per-source health (successes, failures, scrape time, last error), fetch status and an activity log.
+- **Suggested themes and countries.** Themes the model detects that aren't in your list are counted and can be added with one click.
+- **Three layouts.** Card, list and magazine views, remembered between visits.
+- **Search and filters.** Text search plus filters for country, theme, sentiment range, date range, and read or bookmarked status.
+- **Reading helpers.** Bookmarks, read tracking, keyboard shortcuts and toast notifications when a fetch or AI run finishes.
+- **Scheduled fetching.** Runs every 2 to 24 hours, with a manual trigger and a live progress bar.
 
-## Key Capabilities
+## Tech stack
 
-- **Multi-source news collection** — Pulls articles from RSS/Atom feeds, news APIs, and scraped websites. Add any source you want and NewsRadar will fetch on your schedule.
-- **AI-powered content enrichment** — Every article is automatically summarised, tagged with relevant themes, scored for sentiment (from negative to positive), and ranked by country relevance — all using a local AI model running on your own machine.
-- **Automatic story grouping** — When multiple sources report on the same event, NewsRadar detects the overlap and merges them into a single story with a unified AI summary. You can switch between different providers' coverage of the same story with one click.
-- **Full-text search & filtering** — Search across thousands of articles by keyword, country, topic, sentiment range, date range, bookmarks, or read status. Results update instantly.
-- **Real-time monitoring dashboard** — A live dashboard shows article counts per country and theme, sentiment breakdowns, source health statistics, recent articles, and an activity log of fetch cycles — all updated automatically.
-- **Adaptable reading experience** — Switch between card, list, and magazine layouts. Bookmark articles, track reading progress, and navigate with keyboard shortcuts.
-- **Self-hosted and private** — Everything runs on your own infrastructure. No third-party data processing, no external dependencies beyond optional news API keys and a local AI model.
+Python · FastAPI · SQLAlchemy (async) · SQLite · APScheduler · feedparser · httpx · Playwright · Ollama · React · Vite · Zustand
 
-## Tech Highlights
+## How it works
 
-| Layer | Technology |
-|-------|------------|
-| Backend | Python with async API framework |
-| Frontend | Modern React with reactive state management |
-| Database | SQLite (zero-config, no external database server required) |
-| AI | Local LLM integration (Ollama — runs entirely on your hardware) |
-| Scraping | RSS/Atom parsing, news API clients, and headless browser automation |
-| Deployment | Systemd service with automated install script |
+NewsRadar is a single FastAPI service that also serves the built React frontend. A fetch cycle runs in two phases, so new articles appear in the UI straight away and AI work catches up in the background:
 
-## Screenshots
+```
+sources ──► scrape ──► dedup (URL, title) ──► save
+                                                │
+                     ┌──────────────────────────┘
+                     ▼
+        Ollama: summary, themes, sentiment, relevance
+                     │
+                     ▼
+        similarity check ──► merge into story group
+```
 
-> *Screenshots available on request or at a demo instance.*
+Settings (tracked countries, themes, fetch interval, model, API keys) and all articles live in one SQLite database. New Playwright scrapers are small Python classes registered as a source.
 
-*(Visuals to be added — the dashboard features a dark-themed UI with stat cards, article grids, theme bar charts, sentiment breakdowns, and source health panels.)*
+## Availability
 
-## Status & Availability
+The source code is not public. NewsRadar is available for licensing, custom deployment or white-label adaptation. Get in touch via [munda.si](https://www.munda.si/#contact).
 
-NewsRadar is actively developed and deployed in production. All core features — multi-source scraping, AI enrichment, story grouping, search, and the full dashboard — are implemented and functional. Planned enhancements include user authentication, multi-user support, email digests, and additional AI model backends.
+## License
 
-## Interested?
+Proprietary. © 2026 MUNDA PLUS d.o.o. All rights reserved. See [LICENSE](LICENSE).
 
-This is a proprietary project by **Munda Plus d.o.o.**
-The full codebase is available for review upon request.
+## Author
 
-📧 marko@munda.si  
-🌐 [munda.si](https://www.munda.si)
+Built by [Marko Munda](https://www.munda.si/) · [Munda Plus](https://github.com/MundaPlus)
