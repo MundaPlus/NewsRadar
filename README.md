@@ -4,7 +4,15 @@
 
 When two sources report the same story, the articles are grouped together, so one story shows up once with every source that covered it.
 
-<!-- screenshots -->
+![Dashboard](screenshots/dashboard.jpg)
+
+> Screenshots show a demo instance with public news articles.
+
+| Country view | Theme list |
+|---|---|
+| ![Country view with AI summaries, sentiment and grouped sources](screenshots/country.jpg) | ![Articles tagged with one theme, list layout](screenshots/theme-list.jpg) |
+
+![Article with the local model's summary, sentiment and country relevance](screenshots/article.jpg)
 
 ## Features
 
